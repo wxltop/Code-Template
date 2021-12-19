@@ -1,12 +1,13 @@
- 
+from functools import partial
+from itertools import count 
+import random
+
 import numpy as np
+import pandas as pd
 from IPython import display
+from pylab import mpl
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-import random
-from functools import partial
-from itertools import count
-import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
  
@@ -196,9 +197,15 @@ def set_figsize(figsize=(4, 3)):
     
 def plot(X, Y=None, xlabel=None, ylabel=None, legend=None, 
          xlim=None, ylim=None, xscale='linear', yscale='linear',
-         fmts=('-', 'm--', 'g-.', 'r:'), figsize=(7, 4), axes=None):
+         color=('blue', 'magenta', 'green', 'red', 'cyan', 'y', 'black', 
+                'orange', 'purple', 'pink', 'olive', 'gray', 'brown'), 
+         linestyle=('-', '--', ':', '-.'), 
+         marker=('.', 'o', 'v', '^', '<', '>', '1', '2', '3', 
+                 '4', '8', 's', 'p', '*', 'h', '+', 'x', 'D', 'd'),
+         markerfacecolor=('blue', 'magenta', 'green', 'red', 'cyan', 'y', 'black', 
+                          'orange', 'purple', 'pink', 'olive', 'gray', 'brown'),
+         markersize=6, usemarker=True, figsize=(7, 4), axes=None):
     """绘制数据点
-
     Args:
         X ([type]): [description]
         Y ([type], optional): [description]. Defaults to None.
@@ -224,7 +231,27 @@ def plot(X, Y=None, xlabel=None, ylabel=None, legend=None,
                 legend=['10sin(x)', '10cos(x)', 'x**2/100', '10x'])
             plt.show()
         ```
+        
+        ```python
+            x = [i for i in range(10)]
+            n = 10
+            y = []
+            for i in range(n):
+                y.append(np.array(x) * 2 + i)
+
+            plot(x, y, legend=[f'{i}' for i in range(n)], xlabel='哈哈哈')
+        ```
     """
+    from cycler import cycler as cy
+
+    color_ = cy(color=color)()
+    linestyle_ = cy(linestyle=linestyle)()
+    marker_ = cy(marker=marker)()
+    markerfacecolor_ = cy(markerfacecolor=markerfacecolor)()
+    
+    # 显示中文
+    mpl.rcParams['font.sans-serif'] = ['SimHei']  # 显示中文
+    
     if legend is None:
         legend = []
 
@@ -244,11 +271,24 @@ def plot(X, Y=None, xlabel=None, ylabel=None, legend=None,
     if len(X) != len(Y):
         X = X * len(Y)
     axes.cla()
-    for x, y, fmt in zip(X, Y, fmts):
+    for x, y in zip(X, Y):
+        c = next(color_)
+        ls = next(linestyle_)
+        m = next(marker_)
+        mfc = next(markerfacecolor_)
         if len(x):
-            axes.plot(x, y, fmt)
+            if usemarker:
+                axes.plot(x, y, color=c['color'], linestyle=ls['linestyle'], 
+                        marker=m['marker'], markerfacecolor=mfc['markerfacecolor'], markersize=markersize)
+            else:
+                axes.plot(x, y, color=c['color'], linestyle=ls['linestyle'])
+                        
         else:
-            axes.plot(y, fmt)
+            if usemarker:
+                axes.plot(y, color=c['color'], linestyle=ls['linestyle'], 
+                      marker=m['marker'], markerfacecolor=mfc['markerfacecolor'], markersize=markersize)
+            else:
+                axes.plot(y, color=c['color'], linestyle=ls['linestyle'])
     set_axes(axes, xlabel, ylabel, xlim, ylim, xscale, yscale, legend)
 
 #************************************************************************
